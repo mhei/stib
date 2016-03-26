@@ -1,0 +1,46 @@
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides:          populate_g_cdc_conf
+# Required-Start:    $local_fs
+# Required-Stop:
+# Should-Start:
+# Default-Start:     S
+# Default-Stop:
+# Short-Description: Populate /etc/modprobe.d/g_cdc.conf with device specific data.
+# Description:
+### END INIT INFO
+
+PATH=/sbin:/usr/sbin:/bin:/usr/bin
+. /lib/init/vars.sh
+. /etc/device_info
+
+do_start () {
+	#
+	# Determine device serial and a MAC address for the USB gadget interface on the host side
+	#
+	serial=$(fw_printenv -n 'serial#' 2> /dev/null)
+	mac=$(sed -e 's/00\:01\:87/02\:01\:87/' /sys/class/net/eth0/address)
+
+	cat <<-EOF > /etc/modprobe.d/g_cdc.conf
+	options g_cdc ${serial:+iSerialNumber="$serial"} iManufacturer="$DEVICE_MANUFACTURER" iProduct="$DEVICE_PRODUCT" ${mac:+host_addr="$mac"}
+	EOF
+}
+
+case "$1" in
+  start|"")
+	do_start
+	;;
+  restart|reload|force-reload)
+	echo "Error: argument '$1' not supported" >&2
+	exit 3
+	;;
+  stop|status)
+	# No-op
+	;;
+  *)
+	echo "Usage: populate_g_cdc_conf [start|stop]" >&2
+	exit 3
+	;;
+esac
+
+:

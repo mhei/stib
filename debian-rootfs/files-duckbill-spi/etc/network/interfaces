@@ -12,12 +12,14 @@ iface eth0 inet manual
 
 iface eth1 inet manual
 
+iface usb0 inet manual
+
 # Bridge setup
 auto br0
 iface br0 inet dhcp
-    bridge_ports eth0 eth1
+    bridge_ports eth0 eth1 usb0
     bridge_maxwait 2
-    post-up /sbin/brctl setfd br0 0
+    bridge_fd 0
 
 # Static emergency fallback IP address
 auto br0:1

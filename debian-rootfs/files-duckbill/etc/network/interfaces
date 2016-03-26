@@ -7,12 +7,20 @@ source /etc/network/interfaces.d/*
 auto lo
 iface lo inet loopback
 
-# The primary network interface
-auto eth0
-iface eth0 inet dhcp
+# Set up interfaces manually, avoiding conflicts with, e.g., network manager
+iface eth0 inet manual
+
+iface usb0 inet manual
+
+# Bridge setup
+auto br0
+iface br0 inet dhcp
+    bridge_ports eth0 usb0
+    bridge_maxwait 0
+    bridge_fd 0
 
 # Static emergency fallback IP address
-auto eth0:1
-iface eth0:1 inet static
+auto br0:1
+iface br0:1 inet static
     address 169.254.12.53
     netmask 255.255.0.0
